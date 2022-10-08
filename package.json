@@ -6,17 +6,22 @@
   "engines": {
     "vscode": "^1.71.0"
   },
+  "icon": "icon.jpg",
+  "repository": {
+    "type": "git",
+    "url": ""
+  },
   "categories": [
     "Other"
   ],
   "activationEvents": [
-    "onCommand:headerfilecustom.helloWorld"
+    "onCommand:headerfilecustom.sayHello"
   ],
   "main": "./extension.js",
   "contributes": {
     "commands": [{
-      "command": "headerfilecustom.helloWorld",
-      "title": "Hello World"
+      "command": "headerfilecustom.sayHello",
+      "title": "HeaderFileCustom"
     }]
   },
   "scripts": {

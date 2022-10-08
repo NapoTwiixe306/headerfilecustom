@@ -1,36 +1,131 @@
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
-const vscode = require('vscode');
+const vscode = require("vscode");
 
-// this method is called when your extension is activated
-// your extension is activated the very first time the command is executed
+Date.prototype.format = function(format) {
+    var o = {
+        "M+": this.getMonth() + 1, //month
+        "d+": this.getDate(), //day
+        "h+": this.getHours(), //hour
+        "m+": this.getMinutes(), //minute
+        "s+": this.getSeconds(), //second
+        "q+": Math.floor((this.getMonth() + 3) / 3), //quarter
+        S: this.getMilliseconds() //millisecond
+    };
+    if (/(y+)/.test(format)) {
+        format = format.replace(RegExp.$1, (this.getFullYear() + "").substr(4 - RegExp.$1.length));
+    }
+    for (var k in o) {
+        if (new RegExp("(" + k + ")").test(format)) {
+            format = format.replace(RegExp.$1, RegExp.$1.length == 1 ? o[k] : ("00" + o[k]).substr(("" + o[k]).length));
+        }
+    }
+    return format;
+};
 
-/**
- * @param {vscode.ExtensionContext} context
- */
 function activate(context) {
+    console.log('Extension "js-file-header" is now active!');
 
-	// Use the console to output diagnostic information (console.log) and errors (console.error)
-	// This line of code will only be executed once when your extension is activated
-	console.log('Congratulations, your extension "headerfilecustom" is now active!');
+    // The command has been defined in the package.json file
+    // Now provide the implementation of the command with  registerCommand
+    // The commandId parameter must match the command field in package.json
+    let disposable = vscode.commands.registerCommand("extension.addFileHeader", function() {
+        // The code you place here will be executed every time your command is executed
+        var config = vscode.workspace.getConfiguration("FileHeader");
+        console.log(config);
 
-	// The command has been defined in the package.json file
-	// Now provide the implementation of the command with  registerCommand
-	// The commandId parameter must match the command field in package.json
-	let disposable = vscode.commands.registerCommand('headerfilecustom.sayHello', function () {
-		// The code you place here will be executed every time your command is executed
+        var editor = vscode.window.activeTextEditor;
+        if (!editor) {
+            vscode.window.showErrorMessage("No open files, please open a file to add header!");
+            return; // No open text editor
+        }
 
-		// Display a message box to the user
-		vscode.window.showInformationMessage('Hello World from HeaderFileCustom!');
-	});
+        editor.edit(function(editBuilder) {
+            try {
+                editBuilder.insert(new vscode.Position(0, 0), compileFileHeader(config));
+            } catch (error) {
+                console.error(error);
+            }
+        });
+    });
 
-	context.subscriptions.push(disposable);
+    var compileFileHeader = function(config) {
+        var line = "/**\n";
+
+        if (config.Copyright) {
+            var copyright = config.Copyright.replace(/\n/g, "\n * ");
+            line += " * {copyright}\n".replace("{copyright}", copyright);
+            line += " *\n";
+        }
+
+        if (config.License) {
+            var license = config.License.replace(/\n/g, "\n * ");
+            line += " * {license}\n".replace("{license}", license);
+            line += " *\n";
+        }
+
+        line += " * long description for the file\n";
+        line += " *\n";
+        line += " * Extension Created by : Julien / NapoTwiixe\n";
+        line += " *\n";
+        line += " * Created at     : {time} \n".replace("{time}", new Date().format("yyyy-MM-dd hh:mm:ss"));
+        line += " * Last modified  : {time} \n".replace("{time}", new Date().format("yyyy-MM-dd hh:mm:ss"));
+        line += " */\n\n";
+        return line;
+    };
+
+    var fileHeaderFormatter = function() {
+        setTimeout(function() {
+            console.log("Invoke fileHeaderFormatter");
+            try {
+                var editor = vscode.editor || vscode.window.activeTextEditor;
+                var document = editor.document;
+                var lastModifiedRange = null;
+                var lastModifiedText = null;
+                var lineCount = document.lineCount;
+                var found = false;
+                var diff = 0;
+                for (var i = 0; i < lineCount; i++) {
+                    var linetAt = document.lineAt(i);
+                    var line = linetAt.text;
+                    line = line.trim();
+                    if (line.indexOf("Last modified  :") > -1) {
+                        var time = line
+                            .replace("Last modified  : ", "")
+                            .replace("*", "")
+                            .replace(" ", "");
+                        var oldTime = new Date(time);
+                        var curTime = new Date();
+                        diff = (curTime - oldTime) / 1000;
+                        lastModifiedRange = linetAt.range;
+                        lastModifiedText = " * Last modified  : {time}".replace("{time}", new Date().format("yyyy-MM-dd hh:mm:ss"));
+                        found = true;
+                    }
+                    if (found) {
+                        break;
+                    }
+                }
+                if (found && diff > 15 && lastModifiedRange != null) {
+                    console.log("Replace last modified time");
+                    setTimeout(function() {
+                        editor.edit(function(edit) {
+                            edit.replace(lastModifiedRange, lastModifiedText);
+                        });
+                        document.save();
+                    }, 200);
+                }
+            } catch (error) {
+                console.error(error);
+            }
+        }, 200);
+    };
+
+    context.subscriptions.push(disposable);
+    context.subscriptions.push(compileFileHeader);
+
+    // Listen to file changes and run formatter
+    vscode.workspace.onDidSaveTextDocument(fileHeaderFormatter);
 }
+exports.activate = activate;
 
 // this method is called when your extension is deactivated
 function deactivate() {}
-
-module.exports = {
-	activate,
-	deactivate
-}
+exports.deactivate = deactivate;

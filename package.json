@@ -1,43 +1,75 @@
 {
-  "name": "headerfilecustom",
-  "displayName": "HeaderFileCustom",
-  "description": "",
-  "version": "0.0.1",
-  "engines": {
-    "vscode": "^1.71.0"
+  "name": "headerfile",
+  "displayName": "Header File ",
+  "description": "take a header for you'r file",
+  "version": "0.1.3",
+  "publisher": "NapoTwiixe306",
+  "galleryBanner": {
+      "color": "#ffe04b",
+      "theme": "light"
   },
   "icon": "icon.jpg",
   "repository": {
-    "type": "git",
-    "url": ""
+      "type": "git",
+      "url": "https://github.com/NapoTwiixe306/headerfilecustom"
+  },
+  "engines": {
+      "vscode": "^1.17.0"
   },
   "categories": [
-    "Other"
+      "Other"
   ],
   "activationEvents": [
-    "onCommand:headerfilecustom.sayHello"
+      "onCommand:extension.addFileHeader",
+      "onLanguage:*"
   ],
-  "main": "./extension.js",
+  "main": "./extension",
   "contributes": {
-    "commands": [{
-      "command": "headerfilecustom.sayHello",
-      "title": "HeaderFileCustom"
-    }]
+      "configuration": {
+          "type": "object",
+          "title": "Header Custom",
+          "properties": {
+              "FileHeader.Author": {
+                  "type": "string",
+                  "default": "NapoTwiixe / Julien",
+                  "description": "Author name and email"
+              },
+              "FileHeader.Copyright": {
+                  "type": "string",
+                  "default": false,
+                  "description": "Copyright information"
+              },
+              "FileHeader.License": {
+                  "type": "string",
+                  "default": false,
+                  "description": "License information"
+              }
+          }
+      },
+      "commands": [
+          {
+              "command": "extension.addFileHeader",
+              "title": "FileHeader"
+          }
+      ],
+      "keybindings": [
+          {
+              "command": "extension.addFileHeader",
+              "key": "ctrl+k",
+              "when": "editorTextFocus"
+          }
+      ]
   },
   "scripts": {
-    "lint": "eslint .",
-    "pretest": "npm run lint",
-    "test": "node ./test/runTest.js"
+      "postinstall": "node ./node_modules/vscode/bin/install",
+      "test": "node ./node_modules/vscode/bin/test"
   },
   "devDependencies": {
-    "@types/vscode": "^1.71.0",
-    "@types/glob": "^7.2.0",
-    "@types/mocha": "^9.1.1",
-    "@types/node": "16.x",
-    "eslint": "^8.20.0",
-    "glob": "^8.0.3",
-    "mocha": "^10.0.0",
-    "typescript": "^4.7.4",
-    "@vscode/test-electron": "^2.1.5"
+      "@types/mocha": "^2.2.42",
+      "@types/node": "^7.10.7",
+      "eslint": "^4.19.1",
+      "mocha": "^6.2.0",
+      "typescript": "^2.9.2",
+      "vscode": "^1.1.36"
   }
 }

@@ -1,6 +1,6 @@
+// @ts-nocheck
 const vscode = require("vscode");
 
-// @ts-ignore
 Date.prototype.format = function(format) {
     var o = {
         "M+": this.getMonth() + 1, //month
@@ -66,11 +66,9 @@ function activate(context) {
 
         line += " * long description for the file\n";
         line += " *\n";
-        line += " * Extension Created by : Julien / NapoTwiixe\n";
+        line += " * @author {author}\n".replace("{author}", config.Author);
         line += " *\n";
-        // @ts-ignore
         line += " * Created at     : {time} \n".replace("{time}", new Date().format("yyyy-MM-dd hh:mm:ss"));
-        // @ts-ignore
         line += " * Last modified  : {time} \n".replace("{time}", new Date().format("yyyy-MM-dd hh:mm:ss"));
         line += " */\n\n";
         return line;
@@ -80,7 +78,6 @@ function activate(context) {
         setTimeout(function() {
             console.log("Invoke fileHeaderFormatter");
             try {
-                // @ts-ignore
                 var editor = vscode.editor || vscode.window.activeTextEditor;
                 var document = editor.document;
                 var lastModifiedRange = null;
@@ -99,10 +96,8 @@ function activate(context) {
                             .replace(" ", "");
                         var oldTime = new Date(time);
                         var curTime = new Date();
-                        // @ts-ignore
                         diff = (curTime - oldTime) / 1000;
                         lastModifiedRange = linetAt.range;
-                        // @ts-ignore
                         lastModifiedText = " * Last modified  : {time}".replace("{time}", new Date().format("yyyy-MM-dd hh:mm:ss"));
                         found = true;
                     }
@@ -124,6 +119,9 @@ function activate(context) {
             }
         }, 200);
     };
+
+    //header 19
+    
 
     context.subscriptions.push(disposable);
     context.subscriptions.push(compileFileHeader);

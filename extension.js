@@ -89,7 +89,7 @@ function activate(context) {
                     var linetAt = document.lineAt(i);
                     var line = linetAt.text;
                     line = line.trim();
-                    if (line.indexOf("Last modified  :") > -1) {
+                    if (line.indexOf("Derniere modification  :") > -1) {
                         var time = line
                             .replace("Last modified  : ", "")
                             .replace("*", "")
